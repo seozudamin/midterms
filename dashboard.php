@@ -30,7 +30,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="container mt-5">
     <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center">
-        <h3>Welcome to the System: </h3>
+        <?php
+        // Display the user's email if it is set in the session
+        if (isset($_SESSION['email'])) {
+            $emailaddress = $_SESSION['email'];
+            echo "<h3>Welcome to the System: $emailaddress</h3>";
+        } else {
+            // If no email is set, show a default message
+            echo "<h3>Welcome to the System</h3>";
+        }
+        ?>
         <form method="POST">
             <!-- Logout button -->
             <button type="submit" class="btn btn-danger" name="LogoutBtn">Logout</button>
