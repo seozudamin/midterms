@@ -1,6 +1,15 @@
 <?php
 $pageTitle = 'Home';
 include('header.php');
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['LoginBtn'])) {
+    // Get the email and password from the form
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    header("Location: dashboard.php");
+    exit();
+}
 ?>
 
 <!--Login Form-->
@@ -17,7 +26,7 @@ include('header.php');
                             </div>
                         </div>
                     </div>
-                    <form action="#!">
+                    <form action="" method="post">
                         <div class="row gy-3 gy-md-4 mb-5 overflow-hidden">
                             <div class="col-12">
                                 <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
