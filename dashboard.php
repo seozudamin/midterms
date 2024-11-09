@@ -7,6 +7,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Redirect to index.php on logout
         header("Location: index.php");
         exit();
+    } elseif (isset($_POST['action']) && $_POST['action'] === 'register') {
+        // Redirect to register.php when Register button is clicked
+        header("Location: /student/register.php");
+        exit();
     }
     header("Location: index.php");
     exit();
@@ -50,7 +54,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="card-body">
                     <p>This section allows you to register a new student in the system. Click the button below to
                         proceed with the registration process.</p>
-                    <button class="btn btn-primary">Register</button>
+                    <form method="POST">
+                        <input type="hidden" name="action" value="register">
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </form>
                 </div>
             </div>
         </div>
