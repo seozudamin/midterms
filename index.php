@@ -1,18 +1,39 @@
 <?php
+include('function.php');
+
 $pageTitle = 'Home';
 include('header.php');
+
+// Check if the user is already logged in and redirect to the dashboard if active
+checkUserSessionIsActive();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['LoginBtn'])) {
     // Get the email and password from the form
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    header("Location: dashboard.php");
-    exit();
+    // Validate login credentials
+    $errors = validateLoginCredentials($email, $password);
+
+    if (empty($errors)) {
+        // Get the list of users
+        $users = getUsers();
+
+        // Check if the credentials are valid
+        if (checkLoginCredentials($email, $password, $users)) {
+            // Set the session email and redirect to the dashboard
+            $_SESSION['email'] = $email;
+            $_SESSION['current_page'] = 'dashboard.php';
+            header("Location: dashboard.php");
+            exit();
+        } else {
+            $errors[] = 'Invalid email or password.';
+        }
+    }
 }
 ?>
 
-<!--Login Form-->
+<!-- Login Form -->
 
 <div class="bg-light py-3 py-md-5">
     <div class="container">
@@ -26,6 +47,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['LoginBtn'])) {
                             </div>
                         </div>
                     </div>
+                    <!-- Display error messages -->
+                    <?php
+                    if (!empty($errors)) {
+                        echo displayErrors($errors);
+                    }
+                    ?>
                     <form action="" method="post">
                         <div class="row gy-3 gy-md-4 mb-5 overflow-hidden">
                             <div class="col-12">

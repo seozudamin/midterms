@@ -1,19 +1,26 @@
 <?php
+session_start(); // Start the session at the beginning
+
 $pageTitle = 'Home';
 include('header.php');
 
+// Check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // If Logout button is clicked
     if (isset($_POST['LogoutBtn'])) {
-        // Redirect to index.php on logout
+        // Destroy session and clear session variables
+        session_unset(); // Clears session variables
+        session_destroy(); // Destroys the session
+
+        // Redirect to index.php (login page)
         header("Location: index.php");
         exit();
-    } elseif (isset($_POST['action']) && $_POST['action'] === 'register') {
-        // Redirect to register.php when Register button is clicked
+    }
+    // If Register button is clicked, redirect to register.php
+    elseif (isset($_POST['action']) && $_POST['action'] === 'register') {
         header("Location: /student/register.php");
         exit();
     }
-    header("Location: index.php");
-    exit();
 }
 ?>
 
@@ -25,6 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="d-flex justify-content-between align-items-center">
         <h3>Welcome to the System: </h3>
         <form method="POST">
+            <!-- Logout button -->
             <button type="submit" class="btn btn-danger" name="LogoutBtn">Logout</button>
         </form>
     </div>
@@ -55,6 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <p>This section allows you to register a new student in the system. Click the button below to
                         proceed with the registration process.</p>
                     <form method="POST">
+                        <!-- Hidden field to indicate registration action -->
                         <input type="hidden" name="action" value="register">
                         <button type="submit" class="btn btn-primary">Register</button>
                     </form>
