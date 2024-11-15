@@ -1,95 +1,64 @@
 <?php
-// Start session to store student data
 session_start();
 
-// Initialize an empty array to hold error messages
+// Initialize an array to store student data
+if (!isset($_SESSION['students'])) {
+    $_SESSION['students'] = [];
+}
+
+// Initialize variables
+$studentId = $firstName = $lastName = '';
 $errors = [];
 
-// Check if the form has been submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $studentId = trim($_POST['student_id']);
+    $firstName = trim($_POST['first_name']);
+    $lastName = trim($_POST['last_name']);
 
-    // Check if the user wants to logout
-    if (isset($_POST['LogoutBtn'])) {
-        header("Location: index.php");
-        exit();
+    // Validate inputs
+    if (empty($studentId)) {
+        $errors[] = "Student ID is required."; // Error for empty Student ID
     }
-    // Check if the user wants to go to the dashboard
-    elseif (isset($_POST['action']) && $_POST['action'] === 'go_to_dashboard') {
-        header("Location: /dashboard.php");
-        exit();
+    if (empty($firstName)) {
+        $errors[] = "First Name is required."; // Error for empty First Name
     }
-    // Handle registration process
-    elseif (isset($_POST['action']) && $_POST['action'] === 'register') {
-        // Gather form data
-        $student_data = [
-            'student_id' => $_POST['student_id'],
-            'first_name' => $_POST['first_name'],
-            'last_name' => $_POST['last_name']
-        ];
+    if (empty($lastName)) {
+        $errors[] = "Last Name is required."; // Error for empty Last Name
+    }
 
-        // Validate student data
-        $errors = validateStudentData($student_data);
+    // Check for duplicate Student ID
+    if (array_search($studentId, array_column($_SESSION['students'], 'studentId')) !== false) {
+        $errors[] = "Student ID already exists. Please use a different ID."; // Error for duplicate Student ID
+    }
 
-        // Check for duplicate student ID
-        if (empty($errors)) {
-            $errors = checkDuplicateStudentData($student_data);
+    // If there are no errors, process the registration
+    if (empty($errors)) {
+        // Check if the student ID already exists for editing
+        $existingStudentIndex = array_search($studentId, array_column($_SESSION['students'], 'studentId'));
+        if ($existingStudentIndex !== false) {
+            // Update existing student
+            $_SESSION['students'][$existingStudentIndex]['firstName'] = $firstName;
+            $_SESSION['students'][$existingStudentIndex]['lastName'] = $lastName;
+        } else {
+            // Create new student
+            $_SESSION['students'][] = [
+                'studentId' => $studentId,
+                'firstName' => $firstName,
+                'lastName' => $lastName
+            ];
         }
 
-        // If no errors, store the student data in session
-        if (empty($errors)) {
-            $_SESSION['student_data'][] = $student_data; // Add student data to session
-            header("Location: register.php"); // Redirect to the same page to avoid resubmission
-            exit();
-        }
+        // Reset form fields
+        $studentId = $firstName = $lastName = '';
     }
-}
-
-// Function to validate student data
-function validateStudentData($student_data) {
-    $errors = [];
-    
-    if (empty($student_data['student_id'])) {
-        $errors[] = 'Student ID is required.';
-    }
-    if (empty($student_data['first_name'])) {
-        $errors[] = 'First Name is required.';
-    }
-    if (empty($student_data['last_name'])) {
-        $errors[] = 'Last Name is required.';
-    }
-    
-    return $errors;
-}
-
-// Function to check if the student ID already exists
-function checkDuplicateStudentData($student_data) {
-    $errors = [];
-    if (isset($_SESSION['student_data'])) {
-        foreach ($_SESSION['student_data'] as $existing_student) {
-            if ($existing_student['student_id'] === $student_data['student_id']) {
-                $errors[] = 'A student with this ID already exists.';
-                break;
-            }
-        }
-    }
-    return $errors;
 }
 ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <div class="container my-5">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <form method="post" action="">
-                    <input type="hidden" name="action" value="go_to_dashboard">
-                    <button type="submit" class="btn btn-link" style="border: none; background: none; padding: 0; text-decoration: underline; cursor: pointer;">Dashboard</button>
-                </form>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">Register Student</li>
-        </ol>
-    </nav>
+    <h2>Register a New Student</h2>
 
     <!-- Display Errors -->
     <?php if (!empty($errors)): ?>
@@ -103,23 +72,23 @@ function checkDuplicateStudentData($student_data) {
     <?php endif; ?>
 
     <!-- Form for Registering New Student -->
-    <h2>Register a New Student</h2>
     <div class="card mb-4">
         <div class="card-body">
             <form method="post" action="">
-                <input type="hidden" name="action" value="register">
-                
                 <div class="mb-3">
                     <label for="studentId" class="form-label">Student ID</label>
-                    <input type="text" class="form-control" id="studentId" name="student_id" placeholder="Enter Student ID" required>
+                    <input type="text" class="form-control" id="studentId" name="student_id"
+                        placeholder="Enter Student ID" value="<?php echo htmlspecialchars($studentId); ?>" required>
                 </div>
                 <div class="mb-3">
                     <label for="firstName" class="form-label">First Name</label>
-                    <input type="text" class="form-control" id="firstName" name="first_name" placeholder="Enter First Name" required>
+                    <input type="text" class="form-control" id="firstName" name="first_name"
+                        placeholder="Enter First Name" value="<?php echo htmlspecialchars($firstName); ?>" required>
                 </div>
                 <div class="mb-3">
                     <label for="lastName" class="form-label">Last Name</label>
-                    <input type="text" class="form-control" id="lastName" name="last_name" placeholder="Enter Last Name" required>
+                    <input type="text" class="form-control" id="lastName" name="last_name" placeholder="Enter Last Name"
+                        value="<?php echo htmlspecialchars($lastName); ?>" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Register Student</button>
             </form>
@@ -131,23 +100,32 @@ function checkDuplicateStudentData($student_data) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th scope="col">Student ID</th>
-                <th scope="col">First Name</th>
-                <th scope="col">Last Name</th>
-                <th scope="col">Option</th>
+                <th>Student ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Action</th>
             </tr>
         </thead>
-        <tbody id="studentList">
-            <?php if (isset($_SESSION['student_data']) && count($_SESSION['student_data']) > 0): ?>
-                <?php foreach ($_SESSION['student_data'] as $student): ?>
+        <tbody>
+            <?php if (!empty($_SESSION['students'])): ?>
+                <?php foreach ($_SESSION['students'] as $student): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($student['student_id']); ?></td>
-                        <td><?php echo htmlspecialchars($student['first_name']); ?></td>
-                        <td><?php echo htmlspecialchars($student['last_name']); ?></td>
+                        <td><?php echo htmlspecialchars($student['studentId']); ?></td>
+                        <td><?php echo htmlspecialchars($student['firstName']); ?></td>
+                        <td><?php echo htmlspecialchars($student['lastName']); ?></td>
                         <td>
-                            <!-- Option to edit or remove student -->
-                            <button class="btn btn-sm btn-warning">Edit</button>
-                            <button class="btn btn-sm btn-danger">Delete</button>
+                            <!-- Edit Button -->
+                            <form method="post" action="edit.php" style="display:inline;">
+                                <input type="hidden" name="student_id"
+                                    value="<?php echo htmlspecialchars($student['studentId']); ?>">
+                                <button type="submit" class="btn btn-warning btn-sm">Edit</button>
+                            </form>
+                            <!-- Delete Button -->
+                            <form method="post" action="delete.php" style="display:inline;">
+                                <input type="hidden" name="student_id"
+                                    value="<?php echo htmlspecialchars($student['studentId']); ?>">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -159,5 +137,3 @@ function checkDuplicateStudentData($student_data) {
         </tbody>
     </table>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
