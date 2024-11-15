@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update'])) {
                 <div class="mb-3">
                     <label for="studentId" class="form-label">Student ID</label>
                     <input type="text" class="form-control" id="studentId" name="student_id" 
-                        value="<?php echo htmlspecialchars($studentId); ?>" readonly>
+                        value="<?php echo htmlspecialchars($studentId); ?>" readonly  style="background-color: #D3D3D3; color: #646464FF;">
                 </div>
                 <div class="mb-3">
                     <label for="firstName" class="form-label">First Name</label>
