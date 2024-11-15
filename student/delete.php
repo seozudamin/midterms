@@ -1,5 +1,10 @@
 <?php
 session_start();
+if (!isset($_SESSION['email'])) {
+    // If the user is not logged in, redirect to the login page
+    header("Location: index.php");
+    exit();
+}
 
 // Initialize variables
 $studentId = '';
