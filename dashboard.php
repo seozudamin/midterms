@@ -1,6 +1,10 @@
 <?php
 session_start(); // Start the session at the beginning
-
+if (!isset($_SESSION['email'])) {
+    // If the user is not logged in, redirect to the login page
+    header("Location: index.php");
+    exit();
+}
 $pageTitle = 'Home';
 include('header.php');
 
